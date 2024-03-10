@@ -11,15 +11,19 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Transactional
 @AllArgsConstructor
 @Service
@@ -109,5 +113,11 @@ public class JwtService {
         //SignatureAlgorithm.ES512
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(ENCRIPTION_KEY))
                 ;
+    }
+
+    @Scheduled(cron = "0 */1 * * * *")
+    public void removeUselessJwt() {
+        log.info("Suppression des token à {}", Instant.now());
+        this.jwtRepository.deleteAllByExpireAndDesactive(true, true);
     }
 }
