@@ -56,4 +56,14 @@ public class UtilisateurController {
         log.info("deconnexion");
         this.jwtService.deconnexion();
     }
+
+    @PostMapping("/modifier-mot-de-passe")
+    public void modifierMotDePasse(@RequestBody Map<String, String> params) {
+        this.utilisateurService.modifierMotDePasse(params);
+    }
+
+    @PostMapping("/nouveau-mot-de-passe")
+    public void nouveauMotDePasse(@RequestBody Map<String, String> params) {
+        this.utilisateurService.nouveauMotDePasse(params);
+    }
 }

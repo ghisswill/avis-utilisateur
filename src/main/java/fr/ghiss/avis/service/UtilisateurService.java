@@ -12,4 +12,7 @@ public interface UtilisateurService extends UserDetailsService {
     void activer(Map<String, String> activation);
 
 
+    void modifierMotDePasse(Map<String, String> params);
+
+    void nouveauMotDePasse(Map<String, String> params);
 }

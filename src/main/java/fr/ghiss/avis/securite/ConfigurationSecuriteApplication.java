@@ -40,6 +40,8 @@ public class ConfigurationSecuriteApplication {
                             authorize.requestMatchers(POST,"/inscription").permitAll()
                                     .requestMatchers(POST,"/activation").permitAll()
                                     .requestMatchers(POST,"/connexion").permitAll()
+                                    .requestMatchers(POST,"/api/modifier-mot-de-passe").permitAll()
+                                    .requestMatchers(POST,"/api/nouveau-mot-de-passe").permitAll()
                                     .anyRequest().authenticated();
                         }
                 )
