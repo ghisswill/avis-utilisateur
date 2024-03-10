@@ -63,7 +63,25 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public void modifierMotDePasse(Map<String, String> params) {
+        Utilisateur utilisateur = this.loadUserByUsername(params.get("email"));
+        validationService.enregistrer(utilisateur);
+    }
+
+    @Override
+    public void nouveauMotDePasse(Map<String, String> params) {
+        Utilisateur utilisateur = this.loadUserByUsername(params.get("email"));
+        Validation validation = validationService.lireEnfonctionDuCode(params.get("code"));
+
+        if(validation.getUtilisateur().getEmail().equals(utilisateur.getEmail())){
+            String mdpCrypte = this.passwordEncoder.encode(params.get("password"));
+            utilisateur.setMdp(mdpCrypte);
+            utilisateurRepository.save(utilisateur);
+        }
+    }
+
+    @Override
+    public Utilisateur loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.utilisateurRepository
                 .findByEmail(username)
                 .orElseThrow(()-> new UsernameNotFoundException("Aucun utilisateur ne correspond à cet identifiant " + username));

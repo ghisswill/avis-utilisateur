@@ -6,6 +6,7 @@ import fr.ghiss.avis.repository.ValidationRepository;
 import fr.ghiss.avis.service.NotificationService;
 import fr.ghiss.avis.service.ValidationService;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -42,5 +43,10 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public  Validation lireEnfonctionDuCode(String code) {
         return validationRepository.findByCode(code).orElseThrow(()-> new RuntimeException("Votre code est invalide"));
+    }
+
+    @Scheduled(cron = "0 */1 * * * *")
+    public void nettoyerTable() {
+        validationRepository.deleteAllByExpireBefore(Instant.now());
     }
 }
