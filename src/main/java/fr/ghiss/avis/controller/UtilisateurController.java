@@ -50,4 +50,10 @@ public class UtilisateurController {
             return new ResponseEntity<>(this.jwtService.generate(authentificationDTO.username()), HttpStatus.OK);
         throw new SecurityException();
     }
+
+    @PostMapping("/deconnexion")
+    public void deconnexion() {
+        log.info("deconnexion");
+        this.jwtService.deconnexion();
+    }
 }

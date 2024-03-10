@@ -1,5 +1,6 @@
 package fr.ghiss.avis.securite;
 
+import fr.ghiss.avis.entite.Jwt;
 import fr.ghiss.avis.service.UtilisateurService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,17 +30,21 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
         boolean isTokenExpired = true;
+        Jwt tokenDansLaBD = null;
 
 
         String authorization = request.getHeader("Authorization");
 
         if(authorization != null && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
+            tokenDansLaBD = jwtService.tokenByValeur(token);
             isTokenExpired = jwtService.isTokenExpired(token);
             username = jwtService.extractUsername(token);
         }
 
-        if(!isTokenExpired && username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if(!isTokenExpired
+                && tokenDansLaBD.getUtilisateur().getEmail().equals(username)
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = utilisateurService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
