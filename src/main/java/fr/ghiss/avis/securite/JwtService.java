@@ -1,6 +1,7 @@
 package fr.ghiss.avis.securite;
 
 import fr.ghiss.avis.entite.Jwt;
+import fr.ghiss.avis.entite.RefreshToken;
 import fr.ghiss.avis.entite.Utilisateur;
 import fr.ghiss.avis.repository.JwtRepository;
 import fr.ghiss.avis.service.UtilisateurService;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Slf4j
@@ -30,21 +32,36 @@ import java.util.function.Function;
 public class JwtService {
 
     public static final String BEARER = "bearer";
+    public static final String REFRESH = "refresh";
+    public static final String TOKEN_INVALIDE = "Token invalide";
     private final String ENCRIPTION_KEY = "c98872e0fff13650ef330d9f851e267ded36776b87234b7c8daf1f4e41fb665d";
     private final UtilisateurService utilisateurService;
     private final JwtRepository jwtRepository;
 
     public Jwt tokenByValeur(String valeur) {
         return jwtRepository.findByValeurAndDesactiveAndExpire(valeur, false, false)
-                .orElseThrow(()->new RuntimeException("Token inconnu"));
+                .orElseThrow(()->new RuntimeException(TOKEN_INVALIDE));
     }
 
     public Map<String, String> generate(String username) {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
         disableToken(utilisateur);
         Map<String, String> jwtMap = this.generateJwt(utilisateur);
-        Jwt jwt = Jwt.builder().valeur(jwtMap.get(BEARER)).desactive(false).expire(false).utilisateur(utilisateur).build();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .valeur(UUID.randomUUID().toString())
+                .expire(false)
+                .creation(Instant.now())
+                .expiration(Instant.now().plusMillis(30 * 60 * 1000))
+                .build();
+        Jwt jwt = Jwt.builder().
+                valeur(jwtMap.get(BEARER))
+                .desactive(false)
+                .expire(false)
+                .utilisateur(utilisateur)
+                .refreshToken(refreshToken)
+                .build();
         this.jwtRepository.save(jwt);
+        jwtMap.put("refresh", refreshToken.getValeur());
         return jwtMap;
     }
 
@@ -61,7 +78,7 @@ public class JwtService {
         Utilisateur utilisateur = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Jwt jwt = this.jwtRepository
                 .findUtilisateurTokenValid(utilisateur.getEmail(), false, false)
-                .orElseThrow(()-> new RuntimeException("Token invalide"));
+                .orElseThrow(()-> new RuntimeException(TOKEN_INVALIDE));
         jwt.setDesactive(true);
         jwt.setExpire(true);
         jwtRepository.save(jwt);
@@ -91,7 +108,7 @@ public class JwtService {
     @Deprecated
     private Map<String, String> generateJwt(Utilisateur utilisateur) {
         long currentTimeMillis = System.currentTimeMillis();
-        long expirationTimeMillis = currentTimeMillis + 30 * 60 * 1000;
+        long expirationTimeMillis = currentTimeMillis + 60 * 1000;
 
         Map<String, Object> claims = Map.of(
                 "nom", utilisateur.getNom(),
@@ -119,5 +136,15 @@ public class JwtService {
     public void removeUselessJwt() {
         log.info("Suppression des token à {}", Instant.now());
         this.jwtRepository.deleteAllByExpireAndDesactive(true, true);
+    }
+
+    public Map<String, String> refreshToken(Map<String, String> refreshTokenRequest) {
+        Jwt jwt = jwtRepository.findByRefreshToken(refreshTokenRequest.get(REFRESH))
+                .orElseThrow(() -> new RuntimeException("Token invalide"));
+
+        if(jwt.getRefreshToken().isExpire() || jwt.getRefreshToken().getExpiration().isBefore(Instant.now())) {
+            throw  new RuntimeException(TOKEN_INVALIDE);
+        }
+        return this.generate(jwt.getUtilisateur().getEmail());
     }
 }

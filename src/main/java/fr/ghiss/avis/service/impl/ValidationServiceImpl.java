@@ -45,8 +45,8 @@ public class ValidationServiceImpl implements ValidationService {
         return validationRepository.findByCode(code).orElseThrow(()-> new RuntimeException("Votre code est invalide"));
     }
 
-    @Scheduled(cron = "0 */1 * * * *")
-    public void nettoyerTable() {
-        validationRepository.deleteAllByExpireBefore(Instant.now());
-    }
+//    @Scheduled(cron = "0 */1 * * * *")
+//    public void nettoyerTable() {
+//        validationRepository.deleteAllByExpireBefore(Instant.now());
+//    }
 }

@@ -41,6 +41,12 @@ public class UtilisateurController {
         this.utilisateurService.activer(activation);
     }
 
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> refreshTokenRequest) {
+        log.info("refresh token");
+        return new ResponseEntity<>(this.jwtService.refreshToken(refreshTokenRequest), HttpStatus.OK);
+    }
+
     @PostMapping("/connexion")
     public ResponseEntity<Map<String, String>> connexion(@RequestBody AuthentificationDTO authentificationDTO) {
         Authentication authenticate = authenticationManager.authenticate(

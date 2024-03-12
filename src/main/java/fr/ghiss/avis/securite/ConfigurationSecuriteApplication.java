@@ -42,6 +42,7 @@ public class ConfigurationSecuriteApplication {
                                     .requestMatchers(POST,"/connexion").permitAll()
                                     .requestMatchers(POST,"/api/modifier-mot-de-passe").permitAll()
                                     .requestMatchers(POST,"/api/nouveau-mot-de-passe").permitAll()
+                                    .requestMatchers(POST,"/api/refresh-token").permitAll()
                                     .anyRequest().authenticated();
                         }
                 )
