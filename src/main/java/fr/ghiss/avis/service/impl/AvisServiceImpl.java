@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class AvisServiceImpl implements AvisService {
@@ -20,5 +22,10 @@ public class AvisServiceImpl implements AvisService {
         Utilisateur utilisateur = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         avis.setUtilisateur(utilisateur);
         return avisRepository.save(avis);
+    }
+
+    @Override
+    public List<Avis> getAvis() {
+        return (List<Avis>) this.avisRepository.findAll();
     }
 }

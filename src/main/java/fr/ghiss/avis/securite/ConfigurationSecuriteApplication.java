@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,10 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class ConfigurationSecuriteApplication {
 
     private final JwtFilter jwtFilter;
@@ -42,6 +45,7 @@ public class ConfigurationSecuriteApplication {
                                     .requestMatchers(POST,"/connexion").permitAll()
                                     .requestMatchers(POST,"/api/modifier-mot-de-passe").permitAll()
                                     .requestMatchers(POST,"/api/nouveau-mot-de-passe").permitAll()
+                                    .requestMatchers(GET,"/api/avis").hasAnyAuthority("ROLE_MANAGER","ROLE_ADMINISTRATEUR")
                                     .anyRequest().authenticated();
                         }
                 )

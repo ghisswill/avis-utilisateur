@@ -1,0 +1,22 @@
+###
+//Inscription
+POST http://localhost:8080/api/inscription
+Content-Type: application/json
+
+{
+  "nom":"test",
+  "email":"test@test.fr",
+  "mdp":"test"
+}
+
+###
+//Connexion
+POST http://localhost:8080/api/connexion
+Content-Type: application/json
+
+{
+  "username":"ghiss.will@test.fr",
+  "password":"password"
+}
+
+###

@@ -3,6 +3,7 @@ package fr.ghiss.avis.service;
 import fr.ghiss.avis.entite.Utilisateur;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UtilisateurService extends UserDetailsService {
@@ -15,4 +16,6 @@ public interface UtilisateurService extends UserDetailsService {
     void modifierMotDePasse(Map<String, String> params);
 
     void nouveauMotDePasse(Map<String, String> params);
+
+    List<Utilisateur> liste();
 }

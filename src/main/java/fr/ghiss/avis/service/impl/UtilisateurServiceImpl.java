@@ -1,6 +1,6 @@
 package fr.ghiss.avis.service.impl;
 
-import fr.ghiss.avis.TypeDeRole;
+import fr.ghiss.avis.enums.TypeDeRole;
 import fr.ghiss.avis.entite.Role;
 import fr.ghiss.avis.entite.Utilisateur;
 import fr.ghiss.avis.entite.Validation;
@@ -8,16 +8,12 @@ import fr.ghiss.avis.repository.UtilisateurRepository;
 import fr.ghiss.avis.service.UtilisateurService;
 import fr.ghiss.avis.service.ValidationService;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @AllArgsConstructor
 @Service
@@ -78,6 +74,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             utilisateur.setMdp(mdpCrypte);
             utilisateurRepository.save(utilisateur);
         }
+    }
+
+    @Override
+    public List<Utilisateur> liste() {
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        Iterable<Utilisateur> utilisateurIterable = this.utilisateurRepository.findAll();
+
+        for (Utilisateur utilisateur : utilisateurIterable) {
+            utilisateurs.add(utilisateur);
+        }
+        return utilisateurs;
     }
 
     @Override

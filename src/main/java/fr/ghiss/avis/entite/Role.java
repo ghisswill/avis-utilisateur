@@ -1,6 +1,6 @@
 package fr.ghiss.avis.entite;
 
-import fr.ghiss.avis.TypeDeRole;
+import fr.ghiss.avis.enums.TypeDeRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

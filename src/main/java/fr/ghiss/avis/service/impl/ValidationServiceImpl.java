@@ -5,6 +5,7 @@ import fr.ghiss.avis.entite.Validation;
 import fr.ghiss.avis.repository.ValidationRepository;
 import fr.ghiss.avis.service.NotificationService;
 import fr.ghiss.avis.service.ValidationService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.Random;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
+@Transactional
 @AllArgsConstructor
 @Service
 public class ValidationServiceImpl implements ValidationService {
