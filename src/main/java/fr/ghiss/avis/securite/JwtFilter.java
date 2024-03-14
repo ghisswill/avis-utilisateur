@@ -9,8 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -19,10 +21,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final UtilisateurService utilisateurService;
     private final JwtService jwtService;
+    private HandlerExceptionResolver handlerExceptionResolver;
 
-    public JwtFilter(UtilisateurService utilisateurService, JwtService jwtService) {
+    public JwtFilter(UtilisateurService utilisateurService, JwtService jwtService, HandlerExceptionResolver handlerExceptionResolver) {
         this.utilisateurService = utilisateurService;
         this.jwtService = jwtService;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
@@ -32,24 +36,27 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean isTokenExpired = true;
         Jwt tokenDansLaBD = null;
 
+        try {
+            String authorization = request.getHeader("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.substring(7);
+                tokenDansLaBD = jwtService.tokenByValeur(token);
+                isTokenExpired = jwtService.isTokenExpired(token);
+                username = jwtService.extractUsername(token);
+            }
 
-        String authorization = request.getHeader("Authorization");
+            if (!isTokenExpired
+                    && tokenDansLaBD.getUtilisateur().getEmail().equals(username)
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = utilisateurService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
 
-        if(authorization != null && authorization.startsWith("Bearer ")) {
-            token = authorization.substring(7);
-            tokenDansLaBD = jwtService.tokenByValeur(token);
-            isTokenExpired = jwtService.isTokenExpired(token);
-            username = jwtService.extractUsername(token);
+            filterChain.doFilter(request, response);
+
+        } catch (UsernameNotFoundException e) {
+            handlerExceptionResolver.resolveException(request, response, null, e);
         }
-
-        if(!isTokenExpired
-                && tokenDansLaBD.getUtilisateur().getEmail().equals(username)
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = utilisateurService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        }
-
-        filterChain.doFilter(request, response);
     }
 }
